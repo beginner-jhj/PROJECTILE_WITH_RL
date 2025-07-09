@@ -9,7 +9,9 @@ class Renderer:
         self.height = height
         self.pygame = pygame
 
-    def draw_circle(self, point, circle_size=5):
+    def draw_circle(self, point, circle_size=5, log=False):
+        if log:
+            print(f"Drawing circle at: ({point.x}, {point.y}) \n")
         pygame.draw.circle(self.screen, (0, 100, 240), (int(point.x), int(point.y)), circle_size)
 
     def update(self):
@@ -19,8 +21,16 @@ class Renderer:
     def clear(self):
         self.screen.fill((255, 255, 255))
 
-    def render(self, trajectory):
-        self.clear()
-        for point in trajectory:
-            self.draw_circle(point)
-        self.update()
+    def render(self, trajectory, log=False):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+            self.clear()
+            for point in trajectory:
+                self.draw_circle(point, log=log)
+            self.update()
+
+        pygame.quit()

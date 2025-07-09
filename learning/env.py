@@ -7,22 +7,26 @@ class ProjectileEnv(Env):
         super().__init__()
         self.min_angle = 10.0
         self.max_angle = 80.0
-        self.max_steps = 10 
-        self.current_step = 0
-        self.total_reward = 0.0
         self.last_angle = 45.0
-        self.last_reward = 0.0
+        self.last_landing_x = 0.0
+        self.min_speed = 480.0
+        self.max_speed = 520.0
+        self.last_speed = 500.0
+        self.target_x = 1400.0
+
+        self.max_steps = 5
+        self.current_step = 0
+        self.cumulative_reward = 0.0
 
         self.action_space = spaces.Box(
-            low=np.array([self.min_angle], dtype=np.float32),
-            high=np.array([self.max_angle], dtype=np.float32),
+            low=np.array([self.min_angle, self.min_speed], dtype=np.float32),
+            high=np.array([self.max_angle, self.max_speed], dtype=np.float32),
             dtype=np.float32
         )
 
-        # Observation: [angle_norm, reward_norm, step_ratio]
         self.observation_space = spaces.Box(
-            low=np.array([0.0, 0.0, 0.0], dtype=np.float32),
-            high=np.array([1.0, 1.0, 1.0], dtype=np.float32),
+            low=np.array([0.0, -1, 0.0], dtype=np.float32),
+            high=np.array([1.0, 0, 1.0], dtype=np.float32),
             dtype=np.float32
         )
 
@@ -30,43 +34,41 @@ class ProjectileEnv(Env):
         self.state = self._get_state()
 
     def _get_state(self):
-        angle_norm = self.last_angle / 90.0
-        reward_norm = self.last_reward / 10.0
-        step_ratio = self.current_step / self.max_steps
-        return np.array([angle_norm, reward_norm, step_ratio], dtype=np.float32)
+        angle_norm = (self.last_angle-self.min_angle) / (self.max_angle-self.min_angle)
+        error_norm = -abs(self.target_x-self.last_landing_x)/ self.target_x
+        speed_norm = (self.last_speed - 480) / 40.0
+        return np.array([angle_norm, error_norm, speed_norm], dtype=np.float32)
 
     def reset(self):
+        self.last_angle = np.random.uniform(self.min_angle, self.max_angle)
+        self.last_speed = np.random.uniform(self.min_speed, self.max_speed)
         self.current_step = 0
-        self.total_reward = 0.0
-        self.last_angle = 45.0
-        self.last_reward = 0.0
+        self.cumulative_reward = 0.0
         self.state = self._get_state()
         return self.state
 
     def step(self, action):
         angle = float(action[0])
+        speed = float(action[1])
         self.last_angle = angle
+        self.last_speed = speed
 
         simulation_result = self.simulation.run(
             angle=angle,
-            speed=500,
-            apply_air_resistance=True,
-            step=1/120,
-            record_trajectory=False  
+            speed=self.last_speed,
+            apply_air_resistance=False,
+            step=1/60,
+            record_trajectory=False
         )
 
-        landing_x = simulation_result["landing_x"]
-        reward = np.log1p(landing_x)
-        self.last_reward = reward
+        self.last_landing_x = simulation_result["landing_x"]
+        error = abs(self.last_landing_x - self.target_x)
+        reward = np.exp(-(error / 100))
 
-        self.total_reward += reward
+        self.cumulative_reward += reward
         self.current_step += 1
-        done = self.current_step >= self.max_steps
-
         self.state = self._get_state()
-
-        if done:
-            print(f"Last Reward received: {reward}, Last State: {self.state}, Total Reward: {self.total_reward}")
+        done = self.current_step >= self.max_steps
 
         return self.state, reward, done, {}
 
