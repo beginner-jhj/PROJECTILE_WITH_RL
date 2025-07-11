@@ -28,7 +28,7 @@ class AdvancedSimulationEngine:
         angle_rad = math.radians(angle_deg)
         inertia = pymunk.moment_for_circle(mass, 0, radius)
         body = pymunk.Body(mass, inertia)
-        body.position = (100, self.ground_y)
+        body.position = (0, self.ground_y)
         velocity = speed * pymunk.Vec2d(math.cos(angle_rad), -math.sin(angle_rad))
         body.velocity = velocity
         shape = pymunk.Circle(body, radius)

@@ -145,12 +145,24 @@ class Test:
             print(f"Average error: {model_item['average_record']['error']}")
             print("\n")
 
+    def print_record_history(self, models):
+        for model_item in models.values():
+            print(f"Model: {model_item['name']}")
+            for record in model_item['record_history']:
+                print(f"Landing x: {record['landing_x']}")
+                print(f"Angle: {record['angle']}")
+                print(f"Speed: {record['speed']}")
+                print(f"Error: {record['error']}")
+                print("\n")
+
 
 
 if __name__ == "__main__":
     test = Test()
-    result = test.test(max_steps=100, mode="mortar", record_trajectory=False)
+    result = test.test(max_steps=30, mode="no_air_resistance", record_trajectory=False)
+    
     test.print_model_best_record(result, sort="desc")
-    test.print_model_average_record(result, sort="desc")
+    test.print_model_average_record(result)
+    test.print_record_history(result)
     
 
