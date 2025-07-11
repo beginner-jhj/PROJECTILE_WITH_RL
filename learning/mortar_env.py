@@ -8,8 +8,8 @@ class MortarEnv(Env):  # 강화학습을 위한 맞춤형 환경 클래스
 
     def __init__(self, speed=500.0):  # 초기화 시 포탄 속도를 인자로 받음
         super().__init__()  # Gymnasium 기본 초기화
-        self.min_angle = 10.0  # 발사각 최소값(도)
-        self.max_angle = 80.0  # 발사각 최대값(도)
+        self.min_angle = 45.0  # 발사각 최소값(도)
+        self.max_angle = 85.0  # 발사각 최대값(도)
         self.speed = speed  # 초기 속도(m/s)
 
         # State ranges
@@ -42,6 +42,12 @@ class MortarEnv(Env):  # 강화학습을 위한 맞춤형 환경 클래스
         self.engine = None  # 시뮬레이션 엔진 인스턴스
         self.target_x = None  # 목표 지점 x 좌표
 
+    def calculate_error(self, landing_x: float) -> float:
+        """Calculate distance error from the target."""
+        if self.target_x is None:
+            raise ValueError("Environment not reset")
+        return abs(landing_x - self.target_x)
+
     def _sample_scenario(self):  # 무작위 환경 파라미터 생성
         wind = (np.random.uniform(*self.wind_range), np.random.uniform(*self.wind_range))  # 풍속 (x, y)
         temp = np.random.uniform(*self.temp_range)  # 기온
@@ -64,7 +70,7 @@ class MortarEnv(Env):  # 강화학습을 위한 맞춤형 환경 클래스
         angle = float(np.clip(action[0], self.min_angle, self.max_angle))  # 범위 내 발사각 확보
         result = simulate(self.engine, angle, self.speed)  # 시뮬레이션 실행
         landing_x = result["landing_x"]  # 착지 지점 x 좌표
-        error = abs(landing_x - self.target_x)  # 목표와의 오차 계산
+        error = self.calculate_error(landing_x)  # 목표와의 오차 계산
         reward = -error  # 오차가 작을수록 보상 증가
         terminated = True  # 한 발로 에피소드 종료
         truncated = False  # 타임아웃 없음
