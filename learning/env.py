@@ -9,7 +9,7 @@ class ProjectileEnv(Env):
         self.max_angle = 80.0
         self.min_speed = 480.0
         self.max_speed = 520.0
-        self.target_x = 1400.0
+        self.target_x = 400.0
         
         self.last_angle = 45.0
         self.last_speed = 500.0
@@ -35,7 +35,7 @@ class ProjectileEnv(Env):
             dtype=np.float32
         )
         
-        self.simulation = Simulation(1500, 500)
+        self.simulation = Simulation(400, 400)
         self.state = self._get_state()
 
         self.default_simulation_config = {

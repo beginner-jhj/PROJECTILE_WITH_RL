@@ -4,6 +4,13 @@ from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from learning.env import ProjectileEnv
+import learning.configs.mortar 
+import learning.configs.with_air_resistance 
+import learning.configs.no_air_resistance 
+
+mortar_config = learning.configs.mortar.config
+with_air_resistance_config = learning.configs.with_air_resistance.config
+no_air_resistance_config = learning.configs.no_air_resistance.config
 
 
 def make_env(simulation_config=None):
@@ -28,11 +35,6 @@ def learn(config=None):
     from stable_baselines3.common.vec_env import SubprocVecEnv
 
     default_config = {
-        "save": {
-            "save_freq": 20000,
-            "save_model_path": "models_sac/checkpoints/",
-            "name_prefix": "sac_projectile"
-        },
         "env": {
             "generater": make_env,
             "count": 4,
@@ -123,27 +125,7 @@ def learn(config=None):
 
 
 if __name__ == "__main__":
-    learn(config={
-        "env": {
-            "count":6,
-            "simulation_config": {
-                "apply_air_resistance": True
-            }
-        },
-        "save":{
-            "save_model_path": "models_sac_with_air_resistance/checkpoints/",
-            "name_prefix": "sac_projectile_with_air_resistance"
-        },
-        "model":{
-            "tensorboard_log": "logs_sac_with_air_resistance/tensorboard/"
-        },
-        "checkpoint":{
-            "save_freq": 10000,
-            "save_model_path": "models_sac_with_air_resistance/checkpoints/",
-            "name_prefix": "sac_projectile_with_air_resistance"
-        },
-        "train":{
-            "num_iterations": 4
-        }
-    })
+    for config in [ {"config":no_air_resistance_config, "model_name":"no_air_resistance"},{"config":with_air_resistance_config, "model_name":"with_air_resistance"},{"config":mortar_config, "model_name":"mortar"}]:
+        print(f"\n=== {config['model_name']} ===")
+        learn(config=config['config'])
 

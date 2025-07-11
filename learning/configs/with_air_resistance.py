@@ -1,5 +1,13 @@
 from torch import nn
-from learning.learn import make_env
+from learning.env import ProjectileEnv
+from stable_baselines3.common.monitor import Monitor
+
+
+def make_env(simulation_config=None):
+    def _init():
+        env = Monitor(ProjectileEnv(simulation_config=simulation_config))
+        return env
+    return _init
 
 config = {
     "env": {
@@ -8,11 +16,6 @@ config = {
         "simulation_config": {
             "apply_air_resistance": True
         }
-    },
-    "save": {
-        "save_freq": 20000,
-        "save_model_path": "models_sac_with_air_resistance/checkpoints/",
-        "name_prefix": "sac_projectile_with_air_resistance"
     },
     "model": {
         "policy": "MlpPolicy",
@@ -36,7 +39,7 @@ config = {
         "tensorboard_log": "logs_sac_with_air_resistance/tensorboard/"
     },
     "checkpoint": {
-        "save_freq": 10000,
+        "save_freq": 20000,
         "save_model_path": "models_sac_with_air_resistance/checkpoints/",
         "name_prefix": "sac_projectile_with_air_resistance"
     },

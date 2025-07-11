@@ -11,14 +11,9 @@ def make_mortar_env():
     return _init
 
 config = {
-    "save": {
-        "save_freq": 20000,
-        "save_model_path": "models_sac_mortar/checkpoints",
-        "name_prefix": "sac_mortar"
-    },
     "env": {
         "generater": make_mortar_env,
-        "count": 4,
+        "count": 6,
         "simulation_config": None
     },
     "model": {
@@ -49,6 +44,6 @@ config = {
     },
     "train": {
         "total_timesteps_per_iter": 100_000,
-        "num_iterations": 5
+        "num_iterations": 4
     }
 }

@@ -1,15 +1,18 @@
 from torch import nn
-from learning.learn import make_env
+from learning.env import ProjectileEnv
+from stable_baselines3.common.monitor import Monitor
+
+
+def make_env(simulation_config=None):
+    def _init():
+        env = Monitor(ProjectileEnv(simulation_config=simulation_config))
+        return env
+    return _init
 
 config = {
-    "save": {
-        "save_freq": 20000,
-        "save_model_path": "models_sac/checkpoints/",
-        "name_prefix": "sac_projectile"
-    },
     "env": {
         "generater": make_env,
-        "count": 4,
+        "count": 6,
         "simulation_config": None
     },
     "model": {
@@ -40,6 +43,6 @@ config = {
     },
     "train": {
         "total_timesteps_per_iter": 100_000,
-        "num_iterations": 5
+        "num_iterations": 4
     }
 }
