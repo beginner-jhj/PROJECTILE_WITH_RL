@@ -7,12 +7,10 @@ class ProjectileEnv(Env):
         super().__init__()
         self.min_angle = 10.0
         self.max_angle = 80.0
-        self.min_speed = 480.0
-        self.max_speed = 520.0
+        self.speed = 550.0
         self.target_x = 400.0
-        
+
         self.last_angle = 45.0
-        self.last_speed = 500.0
         self.last_landing_x = 0.0
         self.last_error = float('inf')
         self.prev_error = float('inf')
@@ -21,17 +19,17 @@ class ProjectileEnv(Env):
         self.current_step = 0
         self.best_error_in_episode = float('inf')
         
-        # Action space: [angle, speed]
+        # Action space: only angle
         self.action_space = spaces.Box(
-            low=np.array([self.min_angle, self.min_speed], dtype=np.float32),
-            high=np.array([self.max_angle, self.max_speed], dtype=np.float32),
+            low=np.array([self.min_angle], dtype=np.float32),
+            high=np.array([self.max_angle], dtype=np.float32),
             dtype=np.float32
         )
-        
-        # Observation space: [angle_norm, speed_norm, landing_ratio, error_norm, improvement]
+
+        # Observation space: [angle_norm, landing_ratio, error_norm, improvement]
         self.observation_space = spaces.Box(
-            low=np.array([0.0, 0.0, 0.0, 0.0, -1.0], dtype=np.float32),
-            high=np.array([1.0, 1.0, 2.0, 1.0, 1.0], dtype=np.float32),
+            low=np.array([0.0, 0.0, 0.0, -1.0], dtype=np.float32),
+            high=np.array([1.0, 2.0, 1.0, 1.0], dtype=np.float32),
             dtype=np.float32
         )
         
@@ -55,9 +53,7 @@ class ProjectileEnv(Env):
 
     def _get_state(self):
         angle_norm = (self.last_angle - self.min_angle) / (self.max_angle - self.min_angle)
-        
-        speed_norm = (self.last_speed - self.min_speed) / (self.max_speed - self.min_speed)
-        
+
         landing_ratio = max(0, min(2.0, self.last_landing_x / self.target_x))
         
         max_possible_error = self.target_x  
@@ -68,7 +64,7 @@ class ProjectileEnv(Env):
         else:
             improvement = np.tanh((self.prev_error - self.last_error) / 100.0)
         
-        return np.array([angle_norm, speed_norm, landing_ratio, error_norm, improvement], dtype=np.float32)
+        return np.array([angle_norm, landing_ratio, error_norm, improvement], dtype=np.float32)
 
     def _calculate_reward(self, error):
         accuracy_reward = max(0, 1 - (error / self.target_x))
@@ -97,12 +93,11 @@ class ProjectileEnv(Env):
 
     def reset(self,*, seed=None, options=None):
         super().reset(seed=seed)
-        self.last_angle = np.random.uniform(self.min_angle, self.max_angle)  
-        self.last_speed = np.random.uniform(self.min_speed, self.max_speed)  
+        self.last_angle = np.random.uniform(self.min_angle, self.max_angle)
         
         simulation_result = self.simulation.run(
             angle=self.last_angle,
-            speed=self.last_speed,
+            speed=self.speed,
             apply_air_resistance=self.merged_simulation_config["apply_air_resistance"],
             step=self.merged_simulation_config["step"],
             record_trajectory=self.merged_simulation_config["record_trajectory"],
@@ -121,16 +116,14 @@ class ProjectileEnv(Env):
 
     def step(self, action, max_steps=10):
         angle = float(np.clip(float(action[0]), self.min_angle, self.max_angle))
-        speed = float(np.clip(float(action[1]), self.min_speed, self.max_speed))
         
         self.prev_error = self.last_error
-        
+
         self.last_angle = angle
-        self.last_speed = speed
         
         simulation_result = self.simulation.run(
             angle=angle,
-            speed=speed,
+            speed=self.speed,
             apply_air_resistance=self.merged_simulation_config["apply_air_resistance"],
             step=self.merged_simulation_config["step"],
             record_trajectory=self.merged_simulation_config["record_trajectory"],
@@ -153,7 +146,7 @@ class ProjectileEnv(Env):
             'error': self.last_error,
             'landing_x': self.last_landing_x,
             'angle': angle,
-            'speed': speed,
+            'speed': self.speed,
             'best_error': self.best_error_in_episode,
             'trajectory': simulation_result["trajectory"] if self.merged_simulation_config["record_trajectory"] else None
         }
@@ -162,8 +155,10 @@ class ProjectileEnv(Env):
 
     def render(self, mode='human'):
         if mode == 'human':
-            print(f"Step: {self.current_step}, Error: {self.last_error:.2f}, "
-                  f"Angle: {self.last_angle:.2f}, Speed: {self.last_speed:.2f}")
+            print(
+                f"Step: {self.current_step}, Error: {self.last_error:.2f}, "
+                f"Angle: {self.last_angle:.2f}, Speed: {self.speed:.2f}"
+            )
         
     def get_episode_stats(self):
         return {
