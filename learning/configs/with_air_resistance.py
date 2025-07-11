@@ -39,12 +39,12 @@ config = {
         "tensorboard_log": "logs_sac_with_air_resistance/tensorboard/"
     },
     "checkpoint": {
-        "save_freq": 20000,
+        "save_freq": 12288,
         "save_model_path": "models_sac_with_air_resistance/checkpoints/",
         "name_prefix": "sac_projectile_with_air_resistance"
     },
     "train": {
         "total_timesteps_per_iter": 100_000,
-        "num_iterations": 4
+        "num_iterations": 1
     }
 }

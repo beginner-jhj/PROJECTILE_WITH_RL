@@ -4,7 +4,7 @@ from learning.mortar_env import MortarEnv
 
 # Helper to create environments for the mortar simulation
 
-def make_mortar_env():
+def make_mortar_env(simulation_config=None):
     def _init():
         env = Monitor(MortarEnv())
         return env
@@ -38,12 +38,12 @@ config = {
         "tensorboard_log": "logs_sac_mortar/tensorboard"
     },
     "checkpoint": {
-        "save_freq": 20000,
+        "save_freq": 12288,
         "save_model_path": "models_sac_mortar/checkpoints",
         "name_prefix": "sac_mortar"
     },
     "train": {
         "total_timesteps_per_iter": 100_000,
-        "num_iterations": 4
+        "num_iterations": 1
     }
 }

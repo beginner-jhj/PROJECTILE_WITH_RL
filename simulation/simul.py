@@ -5,7 +5,7 @@ class Simulation:
         self.width = width
         self.height = height - 50
 
-    def run(self, angle=45, speed=400, apply_air_resistance=True, step=1/120, record_trajectory=False, log_last_position=False):
+    def run(self, angle=45, speed=550, apply_air_resistance=True, step=1/120, record_trajectory=False, log_last_position=False):
         engine = SimulationEngine(self.width, self.height)
         body = engine.create_projectile(angle_deg=angle, speed=speed, friction=5)
 

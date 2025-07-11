@@ -58,9 +58,9 @@ class Test:
 
         return models
 
-    def get_models(self, air_resistance=False):
+    def get_models(self, model_name=""):
 
-        if air_resistance:
+        if model_name == "air_resistance":
             files = [f for f in os.listdir("models_sac_with_air_resistance/checkpoints/") if "sac_projectile_with_air_resistance" in f]
             for file in files:
                 iteration = file.split("_")[-2]
@@ -135,7 +135,7 @@ class Test:
 
 if __name__ == "__main__":
     test = Test()
-    result = test.test(max_steps=100, air_resistance=False, record_trajectory=False)
+    result = test.test(max_steps=100, mode="no_air_resistance", record_trajectory=False)
     test.print_model_best_record(result, sort="desc")
     test.print_model_average_record(result, sort="desc")
     

@@ -125,7 +125,8 @@ def learn(config=None):
 
 
 if __name__ == "__main__":
-    for config in [ {"config":no_air_resistance_config, "model_name":"no_air_resistance"},{"config":with_air_resistance_config, "model_name":"with_air_resistance"},{"config":mortar_config, "model_name":"mortar"}]:
-        print(f"\n=== {config['model_name']} ===")
-        learn(config=config['config'])
+    # for config in [ {"config":no_air_resistance_config, "model_name":"no_air_resistance"},{"config":with_air_resistance_config, "model_name":"with_air_resistance"},{"config":mortar_config, "model_name":"mortar"}]:
+    #     print(f"\n=== {config['model_name']} ===")
+    #     learn(config=config['config'])
+    learn(config=mortar_config)
 
