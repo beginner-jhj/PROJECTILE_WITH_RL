@@ -1,6 +1,7 @@
 import numpy as np  # 수치 계산을 위한 numpy 사용
 from gymnasium import Env, spaces  # Gymnasium의 Env, spaces 불러오기
 from simulation.advanced_engine import AdvancedSimulationEngine  # 공기 저항 등을 포함한 시뮬레이션 엔진
+from simulation.advanced_simul import simulate
 
 class MortarEnv(Env):  # 강화학습을 위한 맞춤형 환경 클래스
     """Gymnasium environment for learning optimal mortar angles."""  # 간단한 설명
@@ -61,7 +62,7 @@ class MortarEnv(Env):  # 강화학습을 위한 맞춤형 환경 클래스
 
     def step(self, action):  # 에이전트의 행동 실행
         angle = float(np.clip(action[0], self.min_angle, self.max_angle))  # 범위 내 발사각 확보
-        result = self.engine.simulate(angle, self.speed)  # 시뮬레이션 실행
+        result = simulate(self.engine, angle, self.speed)  # 시뮬레이션 실행
         landing_x = result["landing_x"]  # 착지 지점 x 좌표
         error = abs(landing_x - self.target_x)  # 목표와의 오차 계산
         reward = -error  # 오차가 작을수록 보상 증가

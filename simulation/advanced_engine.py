@@ -54,22 +54,3 @@ class AdvancedSimulationEngine:
             if not body.body_type == pymunk.Body.STATIC:
                 self._apply_air_drag(body)
         self.space.step(dt)
-
-    def simulate(self, angle, speed, dt=1/60.0, max_time=10.0, record=False):
-        projectile = self.create_projectile(angle, speed)
-        t = 0.0
-        trajectory = []
-        direction_changed = False
-        while t < max_time:
-            self.step(dt)
-            if record:
-                trajectory.append(projectile.position)
-            if projectile.velocity.y > 0 and not direction_changed:
-                direction_changed = True
-            if abs(projectile.position.y - self.ground_y) < 10 and direction_changed:
-                break
-            t += dt
-        return {
-            "landing_x": projectile.position.x,
-            "trajectory": trajectory if record else None
-        }
